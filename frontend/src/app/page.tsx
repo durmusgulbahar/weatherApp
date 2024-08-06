@@ -114,6 +114,7 @@ export default function Home() {
 
 
             <Container className="bg-yellow-300/80 px-6 gap-4 justify-between">
+               {today?.main.humidity}
             </Container>
           </div>
         </section>
