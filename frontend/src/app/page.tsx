@@ -3,11 +3,16 @@ import { useQuery } from "@tanstack/react-query";
 import { WeatherForecastResponse } from "@/models/WeatherData";
 import { convertKelvinToCelcius } from "@/utils/convertKelvinToCelcius";
 import Container from "@/components/Container";
-import { format, parseISO } from "date-fns";
+import { format, fromUnixTime, parseISO } from "date-fns";
 import WeatherIcon from "@/components/WeatherIcon";
 import { getWeather } from "./services/weather.service";
 import { useEffect, useState } from "react";
 import { useCity } from "./services/useCity";
+import WeatherDetails from "@/components/WeatherDetails";
+import convertWindSpeed from "@/utils/convertWindSpeed";
+import convertMetersToKilometers from "@/utils/convertMetersToKilometers"
+import ForecastWeatherDetail from "@/components/ForecastWeatherDetail";
+import metersToKilometers from "@/utils/convertMetersToKilometers";
 export default function Home() {
   const {city, handleCity} = useCity();
   const [data, setData] = useState<WeatherForecastResponse | null>(null);
@@ -29,7 +34,9 @@ export default function Home() {
         setLoading(false);
       }
     };
+  
 
+    
     fetchData();
   }, [city]);
 
@@ -40,7 +47,9 @@ export default function Home() {
       </div>
     );
   }
-
+  const firstDataForEachDate = data?.list.slice(1).filter(item => {
+    return item.dt_txt.match(/ \b12:00:00\b/);
+  });
   const today = data?.list[0];
   return (
     <div className="flex flex-col gap-4 bg-gray-100 min-h-screen">
@@ -114,14 +123,52 @@ export default function Home() {
 
 
             <Container className="bg-yellow-300/80 px-6 gap-4 justify-between">
-               {today?.main.humidity}
+               <WeatherDetails
+                    visability={convertMetersToKilometers(
+                      today?.visibility ?? 10000
+                    )}
+                    airPressure={`${today?.main.pressure} hPa`}
+                    humidity={`${today?.main.humidity}%`}
+                    sunrise={format(data?.city.sunrise ?? 1702949452, "H:mm")}
+                    // sunrise={}
+                    sunset={format(data?.city.sunset ?? 1702517657, "H:mm")}
+                    windSpeed={convertWindSpeed(today?.wind.speed ?? 1.64)}
+                  />
             </Container>
           </div>
         </section>
         {/*5 days*/}
-        <section className="flex w-full flex-col gap-4">
-          <p className="text-2xl">5 Day Forecast</p>
-        </section>
+        <section className="flex w-full flex-col gap-4  ">
+              <p className="text-2xl">Forecast (Next 4 days)</p>
+              {firstDataForEachDate?.map((d, i) => (
+              
+                <ForecastWeatherDetail
+                  key={i}
+                  description={d?.weather[0].description ?? ""}
+                  weatherIcon={`http://openweathermap.org/img/wn/${d?.weather[0].icon ?? "01d"}@4x.png`}
+                  
+                  date={d ? format(parseISO(d?.dt_txt ?? ""), "EEEE") : ""}
+                  day={d ? format(parseISO(d.dt_txt), "dd.MM") : "EEEE"}
+                  feels_like={d?.main.feels_like ?? 0}
+                  temp={d?.main.temp ?? 0}
+                  temp_max={d?.main.temp_max ?? 0}
+                  temp_min={d?.main.temp_min ?? 0}
+                  airPressure={`${d?.main.pressure} hPa `}
+                  humidity={`${d?.main.humidity}% `}
+                  sunrise={format(
+                    fromUnixTime(data?.city.sunrise ?? 1702517657),
+                    "H:mm"
+                  )}
+                  sunset={format(
+                    fromUnixTime(data?.city.sunset ?? 1702517657),
+                    "H:mm"
+                  )}
+                  visability={`${metersToKilometers(d?.visibility ?? 10000)} `}
+                  windSpeed={`${convertWindSpeed(d?.wind.speed ?? 1.64)} `}
+                />
+              ))}
+            </section>
+        
       </main>
     </div>
   );

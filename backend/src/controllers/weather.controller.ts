@@ -4,11 +4,12 @@ import { WeatherForecastResponse } from "../interfaces/IWeatherForecastResponse"
 import RedisService from "../services/redis.service";
 class WeatherController {
     private baseUrl = `https://api.openweathermap.org/data/2.5`
+
     redisClient = new RedisService().client;
     async getWeatherData(req: Request, res: Response) {
         try {
             const { city } = req.params;
-            const url = `${this.baseUrl}/forecast?q=${city}&appid=${process.env.API_KEY}&cnt=20`;
+            const url = `${this.baseUrl}/forecast?q=${city}&appid=${process.env.API_KEY}&cnt=56`;
 
             // Check if data is in Redis
             const cachedData = await this.redisClient.get(url);

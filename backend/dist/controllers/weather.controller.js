@@ -22,7 +22,7 @@ class WeatherController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { city } = req.params;
-                const url = `${this.baseUrl}/forecast?q=${city}&appid=${process.env.API_KEY}&cnt=20`;
+                const url = `${this.baseUrl}/forecast?q=${city}&appid=${process.env.API_KEY}&cnt=56`;
                 // Check if data is in Redis
                 const cachedData = yield this.redisClient.get(url);
                 if (!cachedData) {

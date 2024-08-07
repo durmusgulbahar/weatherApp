@@ -1,6 +1,6 @@
 
 export async function getWeather(city:string) {
-  const url = `http://localhost:5000/api/v1/${city}`;
+  const url = `https://weather-api.durmusgulbahar.dev/api/v1/${city}`;
 
   const res = await fetch(url, {
     method: "GET",
